@@ -1,0 +1,20 @@
+/**
+ *  !!! DO NOT SHARE THIS FILE !!!
+ *	THIS FILE CONTAINS SENSITIVE CONFIG DATA
+ *
+ */
+
+{
+	SETTINGS: {
+		SHOW_HEADER: true,
+		DCSERVER_URL: "localhost",
+		PREFIX: "/",
+		PORT: "8443"
+	},
+
+	CREDENTIALS: {
+		USERNAME: "username",
+		PASSWORD: "password",
+		TOKEN: "",
+	},
+}

@@ -2,5 +2,4 @@
  ___/ /___/ __(_)__ ____  ___ _/ / /_  /
 / _  / __/\ \/ / _ `/ _ \/ _ `/ /   / / 
 \_,_/\__/___/_/\_, /_//_/\_,_/_/   /_/  
-              /___/  Delta Communications Signal 7        
-						  
+              /___/ Delta Communications Signal 7 

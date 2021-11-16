@@ -1,22 +1,29 @@
 {
-  "name": "dcsignal-7",
-  "version": "1.0.0",
-  "description": "Delta Communications Signal 7 - A secure end to end encrypted chat program that runs from the terminal",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Avoxel284/dcSignal7.git"
-  },
-  "author": "Oliver B",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Avoxel284/dcSignal7/issues"
-  },
-  "homepage": "https://github.com/Avoxel284/dcSignal7#readme",
-  "dependencies": {
-    "chalk": "^4.1.2"
-  }
+	"name": "dcsignal-7",
+	"version": "1.0.0",
+	"description": "Delta Communications Signal 7 - A secure end to end encrypted chat program that runs from the terminal",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"bin": {
+		"dcsignal": "index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Avoxel284/dcSignal7.git"
+	},
+	"author": "Oliver B",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Avoxel284/dcSignal7/issues"
+	},
+	"homepage": "https://github.com/Avoxel284/dcSignal7#readme",
+	"dependencies": {
+		"chalk": "^4.1.2",
+		"clui": "^0.3.6",
+		"express": "^4.17.1",
+		"fs": "^0.0.1-security",
+		"json5": "^2.2.0"
+	}
 }
