@@ -7,6 +7,7 @@ const json5 = require("json5");
 const express = require("express");
 const readline = require("readline");
 const https = require("https");
+const socket = require("socket.io")
 
 const messages = require("./consoleMessages");
 
@@ -72,48 +73,32 @@ async function init() {
 		throw new Error("Please enter your credentials in config.json5");
 
 	// Connect and authenticate
-	https
-		.get({ host: "localhost", port: "8443", path: "/authenticate", rejectUnauthorized: false })
-		.on("error", errorHandler)
-		.on("response", () => {
-			console.log(chalk.greenBright(`✓ Connected and authenticated to server.`));
-		});
+	await new Promise((resolve, reject) => {
+		https
+			.get({ host: "localhost", port: "8443", path: "/authenticate", rejectUnauthorized: false })
+			.on("error", errorHandler)
+			.on("response", () => {
+				console.log(chalk.greenBright(`✓ Connected and authenticated to server.`));
+				resolve();
+			});
+	});
 
 	initializeForMessageInput();
-
-	// https
-	// 	.request(
-	// 		{
-	// 			host: "localhost",
-	// 			port: "8443",
-	// 			path: "/authenticate",
-	// 			method: "GET",
-	// 			rejectUnauthorized: false,
-	// 		},
-	// 		(res) => {
-	// 			console.log(res);
-	// 			res.on("data", (d) => {
-	// 				process.stdout.write(d);
-	// 			});
-	// 		}
-	// 	)
 }
 
 function initializeForMessageInput() {
-	process.stdout.write(`${chalk.blueBright(`#${currentChannel}`)} > `);
+	rl.question(`${chalk.blueBright(`#${currentChannel}`)} > `, onLineInput);
+	// rl.question("Hello?", (a) => console.log(a));
+	// process.stdout.write();
 }
 
 init();
 
-rl.on("line", (input) => {
-	let msg = input; // might modify the message later
-
-	process.stdout.clearLine(false); // clear the input line
-	process.stdout.cursorTo(0);
-
+onLineInput = async (input) => {
+	console.log(`Sending message ${input}`);
 	if (input.charAt(0) === prefix) {
 		// Commands
-		let params = msg.split(" ");
+		let params = input.split(" ");
 		params[0] = params[0].split(prefix)[1];
 
 		switch (params[0].toLowerCase()) {
@@ -136,5 +121,22 @@ rl.on("line", (input) => {
 		return;
 	}
 
+	https
+		.request({
+			host: serverBaseUrl,
+			port: port,
+			path: "/message",
+			method: "POST",
+			rejectUnauthorized: false,
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+		})
+		.on("error", errorHandler)
+		.write(
+			JSON.stringify({
+				content: input,
+			})
+		);
 	initializeForMessageInput();
-});
+};
