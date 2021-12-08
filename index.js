@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 // Avoxel284
 
 const fs = require("fs");
@@ -9,11 +10,11 @@ const https = require("https");
 const socket = require("socket.io");
 
 const configuration = require("./config");
-const log = require("./logging");
+const log = require("./logger");
 const helpcmd = require("./helpcmd");
 
 let username = "Avoxel284";
-let header = fs.readFileSync("./header.txt", "utf-8");
+let header = fs.readFileSync(__dirname + "/templates/banner.txt", "utf-8");
 let app = express();
 let currentChannel;
 let prefix = "/";
@@ -69,7 +70,7 @@ async function init() {
 	// Connect and authenticate
 	await new Promise((resolve, reject) => {
 		https
-			.get({ host: "localhost", port: "8443", path: "/authenticate", rejectUnauthorized: false })
+			.get({ host: serverBaseUrl, port: port, path: "/authenticate", rejectUnauthorized: false })
 			.on("error", errorHandler)
 			.on("response", () => {
 				log.success("Connected and authenticated to server");
