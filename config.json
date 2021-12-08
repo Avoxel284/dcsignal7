@@ -1,0 +1,15 @@
+{
+	"__message": "Please do not share this file as it contains sensitive details!",
+	"settings": {
+		"__message": "Basic configuration settings",
+		"show_header": true,
+		"prefix": "/",
+		"devmode": false
+	},
+	"server": {
+		"__message": "Server backend URL the client will attempt to connect to",
+		"url": "localhost",
+		"port": "8443"
+	},
+	"credentials": { "__message": "Never share this!!!", "token": "" }
+}

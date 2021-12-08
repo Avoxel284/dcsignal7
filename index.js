@@ -3,22 +3,23 @@
 
 const fs = require("fs");
 const chalk = require("chalk");
-const json5 = require("json5");
 const express = require("express");
 const readline = require("readline");
 const https = require("https");
-const socket = require("socket.io")
+const socket = require("socket.io");
 
-const messages = require("./consoleMessages");
+const configuration = require("./config");
+const log = require("./logging");
+const helpcmd = require("./helpcmd");
 
 let username = "Avoxel284";
 let header = fs.readFileSync("./header.txt", "utf-8");
-let config = {};
 let app = express();
 let currentChannel;
 let prefix = "/";
 let serverBaseUrl = "";
 let port = "443";
+let devmode = false;
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -45,32 +46,25 @@ async function init() {
 	process.stdout.write(String.fromCharCode(27) + "]0;" + "dcSignal7" + String.fromCharCode(7));
 
 	// dcSignal header
-	console.log(chalk.blueBright(header) + "\n");
-	if (!chalk.supportsColor) console.log(messages.warning("Console doesn't support colours."));
+	console.log(chalk.rgb(33, 111, 237)(header) + "\n");
+	if (!chalk.supportsColor) log.warning("Console doesn't support colours.");
 
 	// Config
 	try {
-		let configuration = fs.readFileSync("./config.json5", "utf-8");
-		config = json5.parse(configuration);
-		prefix = config.SETTINGS.PREFIX ?? "/";
-		serverBaseUrl = config.SETTINGS.DCSERVER_URL;
-		port = config.SETTINGS.PORT;
-		console.log(chalk.greenBright(`✓ Successfully loaded configuration`));
+		config = configuration.config;
+
+		prefix = config.settings.prefix ?? "/";
+		serverBaseUrl = config.server.dcserver_url;
+		port = config.server.port;
+		devmode = config.settings.devmode;
+		log.success("Successfully loaded configuration");
 	} catch (err) {
 		throw new Error("Failed to load configuration\n" + err);
 	}
 
 	// Check configuration
-	if (config.SETTINGS.DCSERVER_URL == null || config.SETTINGS.DCSERVER_URL == "")
+	if (config?.server?.url == null || config?.server?.url == "")
 		throw new Error("Base server URL is null.");
-
-	if (
-		config.CREDENTIALS.USERNAME == null ||
-		config.CREDENTIALS.PASSWORD == null ||
-		config.CREDENTIALS.USERNAME == "" ||
-		config.CREDENTIALS.PASSWORD == ""
-	)
-		throw new Error("Please enter your credentials in config.json5");
 
 	// Connect and authenticate
 	await new Promise((resolve, reject) => {
@@ -78,7 +72,7 @@ async function init() {
 			.get({ host: "localhost", port: "8443", path: "/authenticate", rejectUnauthorized: false })
 			.on("error", errorHandler)
 			.on("response", () => {
-				console.log(chalk.greenBright(`✓ Connected and authenticated to server.`));
+				log.success("Connected and authenticated to server");
 				resolve();
 			});
 	});
@@ -95,13 +89,15 @@ function initializeForMessageInput() {
 init();
 
 onLineInput = async (input) => {
-	console.log(`Sending message ${input}`);
 	if (input.charAt(0) === prefix) {
 		// Commands
 		let params = input.split(" ");
 		params[0] = params[0].split(prefix)[1];
 
 		switch (params[0].toLowerCase()) {
+			case "help":
+				console.log(helpcmd());
+				break;
 			case "clear":
 				process.stdout.write("\033c");
 				console.log(`${chalk.gray("dcSignal7 - Cleared client console")}`);
@@ -110,12 +106,22 @@ onLineInput = async (input) => {
 				console.log(`${chalk.gray(`Changed channel to ${params[1]}`)}`);
 				currentChannel = params[1];
 				break;
+			case "devmode":
+				if (!devmode) {
+					devmode = true;
+					log.success("Enabled devmode");
+				} else {
+					devmode = false;
+					log.success("Disabled devmode");
+				}
+				configuration.updateSettings("devmode", devmode);
+				break;
 			case "users":
 			case "online":
-				console.log(`${chalk.redBright("Cannot run")}`);
+				log.warning("Cannot run command");
 				break;
 			default:
-				console.log(`${chalk.redBright("Unknown command")}`);
+				log.warning("Unknown command");
 		}
 		initializeForMessageInput();
 		return;
