@@ -9,32 +9,23 @@ const readline = require("readline");
 const https = require("https");
 const socket = require("socket.io");
 
-const configuration = require("./config");
-const log = require("./logger");
-const helpcmd = require("./helpcmd");
+const config = require(`${__dirname}/lib/config.js`);
+const logger = require(`${__dirname}/lib/logger.js`);
+const helpcmd = require(`${__dirname}/lib/helpcmd.js`);
+const server = require(`${__dirname}/lib/server.js`);
 
-let username = "Avoxel284";
-let header = fs.readFileSync(__dirname + "/templates/banner.txt", "utf-8");
-let app = express();
+let header = fs.readFileSync(`${__dirname}/templates/banner.txt`, "utf-8");
 let currentChannel;
 let prefix = "/";
 let serverBaseUrl = "";
 let port = "443";
 let devmode = false;
+const consoleTitle = "dcSignal7";
 
 const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout,
 });
-
-/**
- *
- * @param {String} err Error message
- */
-function errorHandler(err) {
-	console.log(chalk.redBright(`! ${err}`));
-	process.exit(1);
-}
 
 /**
  * Initialize
@@ -43,40 +34,28 @@ async function init() {
 	// Clear console
 	process.stdout.write("\033c");
 
-	// Console title
-	process.stdout.write(String.fromCharCode(27) + "]0;" + "dcSignal7" + String.fromCharCode(7));
+	// Set console title
+	process.stdout.write(`${String.fromCharCode(27)}]0; ${consoleTitle} ${String.fromCharCode(7)}`);
 
 	// dcSignal header
 	console.log(chalk.rgb(33, 111, 237)(header) + "\n");
-	if (!chalk.supportsColor) log.warning("Console doesn't support colours.");
+	if (!chalk.supportsColor) logger.warning("Console doesn't support colours.");
 
 	// Config
 	try {
-		config = configuration.config;
-
-		prefix = config.settings.prefix ?? "/";
-		serverBaseUrl = config.server.dcserver_url;
-		port = config.server.port;
-		devmode = config.settings.devmode;
-		log.success("Successfully loaded configuration");
+		prefix = config.c.settings.prefix ?? "/";
+		serverBaseUrl = config.c.server.dcserver_url;
+		port = config.c.server.port;
+		devmode = config.c.settings.devmode;
+		logger.success("Successfully loaded configuration");
 	} catch (err) {
 		throw new Error("Failed to load configuration\n" + err);
 	}
 
 	// Check configuration
-	if (config?.server?.url == null || config?.server?.url == "")
-		throw new Error("Base server URL is null.");
+	if (!config?.c?.server?.url) throw new Error("Server URL is null");
 
-	// Connect and authenticate
-	await new Promise((resolve, reject) => {
-		https
-			.get({ host: serverBaseUrl, port: port, path: "/authenticate", rejectUnauthorized: false })
-			.on("error", errorHandler)
-			.on("response", () => {
-				log.success("Connected and authenticated to server");
-				resolve();
-			});
-	});
+	await server.authenticate(config.c.server.url, config.c.server.port);
 
 	initializeForMessageInput();
 }
@@ -110,19 +89,19 @@ onLineInput = async (input) => {
 			case "devmode":
 				if (!devmode) {
 					devmode = true;
-					log.success("Enabled devmode");
+					logger.success("Enabled devmode");
 				} else {
 					devmode = false;
-					log.success("Disabled devmode");
+					logger.success("Disabled devmode");
 				}
 				configuration.updateSettings("devmode", devmode);
 				break;
 			case "users":
 			case "online":
-				log.warning("Cannot run command");
+				logger.warning("Cannot run command");
 				break;
 			default:
-				log.warning("Unknown command");
+				logger.warning("Unknown command");
 		}
 		initializeForMessageInput();
 		return;
@@ -139,7 +118,7 @@ onLineInput = async (input) => {
 				"Content-Type": "application/x-www-form-urlencoded",
 			},
 		})
-		.on("error", errorHandler)
+		.on("error", logger.error("Failed to send message"))
 		.write(
 			JSON.stringify({
 				content: input,
