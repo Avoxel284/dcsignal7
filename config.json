@@ -4,7 +4,8 @@
 		"__message": "Basic configuration settings",
 		"show_header": true,
 		"prefix": "/",
-		"devmode": false
+		"devmode": false,
+		"clearAfterSessionEnd": false
 	},
 	"server": {
 		"__message": "Server backend URL the client will attempt to connect to",

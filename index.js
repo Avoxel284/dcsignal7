@@ -10,7 +10,7 @@ const https = require("https");
 const socket = require("socket.io");
 
 const config = require(`${__dirname}/lib/config.js`);
-const logger = require(`${__dirname}/lib/logger.js`);
+const logger = require(`./lib/logger.js`);
 const helpcmd = require(`${__dirname}/lib/helpcmd.js`);
 const server = require(`${__dirname}/lib/server.js`);
 
@@ -31,8 +31,7 @@ const rl = readline.createInterface({
  * Initialize
  */
 async function init() {
-	// Clear console
-	process.stdout.write("\033c");
+	logger.clear();
 
 	// Set console title
 	process.stdout.write(`${String.fromCharCode(27)}]0; ${consoleTitle} ${String.fromCharCode(7)}`);
@@ -62,8 +61,6 @@ async function init() {
 
 function initializeForMessageInput() {
 	rl.question(`${chalk.blueBright(`#${currentChannel}`)} > `, onLineInput);
-	// rl.question("Hello?", (a) => console.log(a));
-	// process.stdout.write();
 }
 
 init();
@@ -126,3 +123,8 @@ onLineInput = async (input) => {
 		);
 	initializeForMessageInput();
 };
+
+process.on("exit", () => {
+	if (config.c().settings.clearAfterSessionEnd) {
+	}
+});
