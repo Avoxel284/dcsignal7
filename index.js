@@ -42,19 +42,19 @@ async function init() {
 
 	// Config
 	try {
-		prefix = config.c.settings.prefix ?? "/";
-		serverBaseUrl = config.c.server.dcserver_url;
-		port = config.c.server.port;
-		devmode = config.c.settings.devmode;
+		prefix = config.c()?.settings?.prefix ?? "/";
+		serverBaseUrl = config.c().server.url;
+		serverPort = config.c().server.port;
+		devmode = config.c().settings.devmode;
 		logger.success("Successfully loaded configuration");
 	} catch (err) {
 		throw new Error("Failed to load configuration\n" + err);
 	}
 
 	// Check configuration
-	if (!config?.c?.server?.url) throw new Error("Server URL is null");
+	if (!serverBaseUrl) throw new Error("Server URL is null");
 
-	await server.authenticate(config.c.server.url, config.c.server.port);
+	await server.authenticate(serverUrl, serverPort);
 
 	initializeForMessageInput();
 }
