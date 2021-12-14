@@ -17,8 +17,8 @@ const server = require(`${__dirname}/lib/server.js`);
 let header = fs.readFileSync(`${__dirname}/templates/banner.txt`, "utf-8");
 let currentChannel;
 let prefix = "/";
-let serverBaseUrl = "";
-let port = "443";
+let serverUrl = "";
+let serverPort = "443";
 let devmode = false;
 const consoleTitle = "dcSignal7";
 
@@ -43,7 +43,7 @@ async function init() {
 	// Config
 	try {
 		prefix = config.c()?.settings?.prefix ?? "/";
-		serverBaseUrl = config.c().server.url;
+		serverUrl = config.c().server.url;
 		serverPort = config.c().server.port;
 		devmode = config.c().settings.devmode;
 		logger.success("Successfully loaded configuration");
@@ -52,7 +52,7 @@ async function init() {
 	}
 
 	// Check configuration
-	if (!serverBaseUrl) throw new Error("Server URL is null");
+	if (!serverUrl) throw new Error("Server URL is null");
 
 	await server.authenticate(serverUrl, serverPort);
 
@@ -106,8 +106,8 @@ onLineInput = async (input) => {
 
 	https
 		.request({
-			host: serverBaseUrl,
-			port: port,
+			host: serverUrl,
+			port: serverPort,
 			path: "/message",
 			method: "POST",
 			rejectUnauthorized: false,
