@@ -5,7 +5,6 @@
 const fs = require("fs");
 const chalk = require("chalk");
 const express = require("express");
-const readline = require("readline");
 const https = require("https");
 const socket = require("socket.io");
 
@@ -22,10 +21,7 @@ let serverPort = "443";
 let devmode = false;
 const consoleTitle = "dcSignal7";
 
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout,
-});
+const rl = logger.rl;
 
 /**
  * Initialize
@@ -56,11 +52,7 @@ async function init() {
 
 	await server.authenticate(serverUrl, serverPort);
 
-	initializeForMessageInput();
-}
-
-function initializeForMessageInput() {
-	rl.question(`${chalk.blueBright(`#${currentChannel}`)} > `, onLineInput);
+	logger.inputInit(currentChannel, onLineInput);
 }
 
 init();
@@ -100,7 +92,7 @@ onLineInput = async (input) => {
 			default:
 				logger.warning("Unknown command");
 		}
-		initializeForMessageInput();
+		logger.inputInit(currentChannel, onLineInput);
 		return;
 	}
 
@@ -110,7 +102,6 @@ onLineInput = async (input) => {
 			port: serverPort,
 			path: "/message",
 			method: "POST",
-			rejectUnauthorized: false,
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded",
 			},
@@ -121,7 +112,7 @@ onLineInput = async (input) => {
 				content: input,
 			})
 		);
-	initializeForMessageInput();
+	logger.inputInit(currentChannel, onLineInput);
 };
 
 process.on("exit", () => {
